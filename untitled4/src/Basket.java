@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 
-public class Basket implements Serializable{
+public class Basket implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String[] things;
@@ -45,24 +45,9 @@ public class Basket implements Serializable{
 
     public void saveTxt(File textFile) throws FileNotFoundException {
         try (PrintWriter out = new PrintWriter(textFile)) {
-          //  for (String good : things) {
-          //      out.println(good + "");
-         //   }
-         //   out.println();
-
-          //  for (var good : prices) {
-          //      out.println(good + "");
-
-          //  }
-           // out.println();
-
-           // for (int quantity : quantities) {
-            //    out.println(quantity + "");
-
-           // }
             out.println(String.join("", things));
-            out.println(String.join ("",Arrays.toString(Arrays.stream(prices).mapToObj(String::valueOf).toArray(String []::new))));
-            out.println(String.join ("",Arrays.toString(Arrays.stream(quantities).mapToObj(String::valueOf).toArray(String []::new))));
+            out.println(String.join("", Arrays.toString(Arrays.stream(prices).mapToObj(String::valueOf).toArray(String[]::new))));
+            out.println(String.join("", Arrays.toString(Arrays.stream(quantities).mapToObj(String::valueOf).toArray(String[]::new))));
 
 
         }
@@ -93,16 +78,17 @@ public class Basket implements Serializable{
 
     }
 
-    public void saveBin(File file){
-        try(ObjectOutputStream ag = new ObjectOutputStream(new FileOutputStream(file))){
+    public void saveBin(File file) {
+        try (ObjectOutputStream ag = new ObjectOutputStream(new FileOutputStream(file))) {
             ag.writeObject(this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public static Basket loadfromBinfile(File file){
+
+    public static Basket loadfromBinfile(File file) {
         Basket basket = null;
-        try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             basket = (Basket) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
