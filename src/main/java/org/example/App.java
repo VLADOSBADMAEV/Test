@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.io.IOException;
 import java.io.FileWriter;
 import java.io.FileNotFoundException;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 
 /**
@@ -24,26 +27,22 @@ public class App {
     static int currentPrice = 0;
     static int sumProducts = 0;
 
-    static File saveFile = new File("basket.bin");
+
+    public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
+        XMLreader reader = new XMLreader(new File("shop.xml"));
+        File loadfile = new File(reader.loadFile);
+        File savefile = new File(reader.saveFile);
+        File logfile = new File(reader.logFile);
 
 
-    public static void main(String[] args) throws FileNotFoundException {
-
-        Baskets basket = null;
-        if (saveFile.exists()) {
-            basket = Baskets.loadfromBinfile(saveFile);
-        } else {
-            basket = new Baskets(products, prices);
-
-        }
+        Baskets basket = createBasket(loadfile, reader.isLoad, reader.loadFormat);
+        Clientlogs log = new Clientlogs();
 
         System.out.println("Список возможных товаров для покупки");
         for (int i = 0; i < products.length; i++) {
             System.out.println(numb[i] + " " + products[i] + " " + prices[i] + " руб/шт");
         }
 
-
-        Clientlogs log = new Clientlogs();
         while (true) {
             System.out.println("Выберите товар и количество или введите `end`");
             String input = scanner.nextLine();
@@ -51,7 +50,10 @@ public class App {
             }
             System.out.println(input);
             if ("end".equals(input)) {
-                log.exportAsCSV(new File("log.csv"));
+                if (reader.isLog) {
+                    log.exportAsCSV(logfile);
+
+                }
                 System.out.println("Программа завершена!");
                 break;
 
@@ -65,8 +67,20 @@ public class App {
             sum[productNumber] = prices[productNumber] * productCount;
             count[productNumber] = productCount;
             basket.addToCart(productNumber, productCount);
-            log.log(productNumber, productCount);
-            basket.saveBin(saveFile);
+            if (reader.isLog) {
+                log.log(productNumber, productCount);
+
+
+            }
+            if (reader.isSave) {
+                switch (reader.saveFormat) {
+                    case "json" -> basket.saveJSON(savefile);
+                    case "txt" -> basket.saveTxt(savefile);
+
+
+                }
+            }
+            basket.saveJSON(savefile);
         }
         basket.printCart();
         for (int i = 0; i < 3; i++) {
@@ -78,6 +92,28 @@ public class App {
             sumProducts += sum[i];
         }
         System.out.println("Итого " + sumProducts + " руб");
+
+    }
+
+    private static Baskets createBasket(File loadfile, boolean isLoad, String loadFormat) {
+        Baskets basket;
+        if (isLoad && loadfile.exists()) {
+            switch (loadFormat) {
+                case "json":
+                    basket = Baskets.loadfromJsonfile(loadfile);
+                    break;
+                case "txt":
+                    basket = Baskets.loadfromJsonfile(loadfile);
+                    break;
+                default:
+                    basket = new Baskets(products, prices);
+            }
+        } else {
+            basket = new Baskets(products, prices);
+
+
+        }
+        return basket;
 
     }
 
